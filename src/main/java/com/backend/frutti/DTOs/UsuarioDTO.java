@@ -1,7 +1,5 @@
 package com.backend.frutti.DTOs;
 
-import java.sql.Date;
-
 import lombok.*;
 import jakarta.validation.constraints.*;
 
@@ -25,7 +23,7 @@ public class UsuarioDTO {
     @NotNull
     private int edad;
 
-    @NotNull
-    @Past
-    private Date fechaNacimiento;
+    @NotBlank
+    private String genero;
+
 }

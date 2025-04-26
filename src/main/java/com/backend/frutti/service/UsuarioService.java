@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.backend.frutti.DTOs.UsuarioDTO;
+import com.backend.frutti.DTOs.UsuarioUpdateDTO;
 import com.backend.frutti.model.Usuario;
 import com.backend.frutti.repository.UsuarioRepository;
 
@@ -33,7 +34,7 @@ public class UsuarioService {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .nombre(dto.getNombre())
                 .edad(dto.getEdad())
-                .fechaNacimiento(dto.getFechaNacimiento())
+                .genero(dto.getGenero())
                 .build();
 
         Usuario UsuarioGuardado = usuarioRepository.save(usuario);
@@ -44,7 +45,7 @@ public class UsuarioService {
                 .password(UsuarioGuardado.getPassword())
                 .nombre(UsuarioGuardado.getNombre())
                 .edad(UsuarioGuardado.getEdad())
-                .fechaNacimiento(UsuarioGuardado.getFechaNacimiento())
+                .genero(UsuarioGuardado.getGenero())
                 .build();
     }
 
@@ -52,13 +53,13 @@ public class UsuarioService {
     public List<UsuarioDTO> listarUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios.stream()
-                .map(u -> new UsuarioDTO(u.getId(), u.getEmail(), u.getPassword(), u.getNombre(), u.getEdad(),
-                        u.getFechaNacimiento()))
+                .map(u -> new UsuarioDTO(u.getId(), u.getEmail(), u.getPassword(), u.getNombre(), u.getEdad(), u.getGenero()
+                       ))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public boolean actualizarUsuario(Long id, UsuarioDTO dto) {
+    public boolean actualizarUsuario(Long id, UsuarioUpdateDTO dto) {
         return usuarioRepository.actualizarUsuario(id, dto.getEmail(), dto.getNombre(), dto.getEdad()) > 0;
     }
 

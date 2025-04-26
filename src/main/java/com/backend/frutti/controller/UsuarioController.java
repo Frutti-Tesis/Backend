@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.backend.frutti.DTOs.UsuarioDTO;
+import com.backend.frutti.DTOs.UsuarioUpdateDTO;
 import com.backend.frutti.service.UsuarioService;
 
 import jakarta.validation.Valid;
@@ -37,7 +38,7 @@ public class UsuarioController {
 
     @PatchMapping("/actualizarUsuario/{id}")
     public ResponseEntity<String> actualizarUsuario(@PathVariable Long id,
-            @RequestBody @Valid UsuarioDTO usuario) {
+            @RequestBody @Valid UsuarioUpdateDTO usuario) {
         boolean actualizado = usuarioService.actualizarUsuario(id, usuario);
         return actualizado ? ResponseEntity.ok("Usuario actualizado correctamente.")
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");

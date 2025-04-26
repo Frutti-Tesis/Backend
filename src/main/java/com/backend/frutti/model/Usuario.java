@@ -1,6 +1,5 @@
 package com.backend.frutti.model;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,8 +26,8 @@ public class Usuario implements UserDetails {
     private String email;
     private String password;
     private String nombre;
+    private String genero;
     private int edad;
-    private Date fechaNacimiento;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
