@@ -37,13 +37,16 @@ public class UsuarioController {
     }
 
     @PatchMapping("/actualizarUsuario/{id}")
-    public ResponseEntity<String> actualizarUsuario(@PathVariable Long id,
-            @RequestBody @Valid UsuarioUpdateDTO usuario) {
-        boolean actualizado = usuarioService.actualizarUsuario(id, usuario);
-        return actualizado ? ResponseEntity.ok("Usuario actualizado correctamente.")
-                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id,
+                                                         @RequestBody @Valid UsuarioUpdateDTO usuarioUpdateDTO) {
+        UsuarioDTO usuarioActualizado = usuarioService.actualizarUsuario(id, usuarioUpdateDTO);
+        if (usuarioActualizado != null) {
+            return ResponseEntity.ok(usuarioActualizado);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
-
+    
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
@@ -53,6 +56,11 @@ public class UsuarioController {
     @GetMapping("/obtenerid/{email}")
     public Long obtenerIdUsuario(@PathVariable String email) {
         return usuarioService.obtenerIdUsuario(email);
+    }
+
+    @GetMapping("/obtenerUsuario/{email}")
+    public UsuarioDTO obtenerUsuario(@PathVariable String email) {
+        return usuarioService.obtenerUsuario(email);
     }
     
 }

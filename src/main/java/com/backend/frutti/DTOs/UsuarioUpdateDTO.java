@@ -15,7 +15,7 @@ public class UsuarioUpdateDTO {
     @Email
     private String email;
 
-    @NotNull
-    private int edad;
+    @NotBlank
+    private String password;
 }
 

@@ -1,6 +1,7 @@
 package com.backend.frutti.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +54,36 @@ public class UsuarioService {
     public List<UsuarioDTO> listarUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios.stream()
-                .map(u -> new UsuarioDTO(u.getId(), u.getEmail(), u.getPassword(), u.getNombre(), u.getEdad(), u.getGenero()
-                       ))
+                .map(u -> new UsuarioDTO(u.getId(), u.getEmail(), u.getPassword(), u.getNombre(), u.getEdad(),
+                        u.getGenero()))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public boolean actualizarUsuario(Long id, UsuarioUpdateDTO dto) {
-        return usuarioRepository.actualizarUsuario(id, dto.getEmail(), dto.getNombre(), dto.getEdad()) > 0;
+    public UsuarioDTO actualizarUsuario(Long id, UsuarioUpdateDTO dto) {
+        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
+        if (optionalUsuario.isPresent()) {
+            Usuario usuario = optionalUsuario.get();
+
+            usuario.setEmail(dto.getEmail());
+            usuario.setNombre(dto.getNombre());
+            if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+            }
+
+            usuarioRepository.save(usuario);
+
+            return UsuarioDTO.builder()
+                    .id(usuario.getId())
+                    .email(usuario.getEmail())
+                    .password(usuario.getPassword())
+                    .nombre(usuario.getNombre())
+                    .edad(usuario.getEdad())
+                    .genero(usuario.getGenero())
+                    .build();
+        } else {
+            return null;
+        }
     }
 
     @Transactional
@@ -82,8 +105,21 @@ public class UsuarioService {
     @Transactional
     public Long obtenerIdUsuario(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
         return usuario.getId();
     }
 
+    @Transactional
+    public UsuarioDTO obtenerUsuario(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+
+        return new UsuarioDTO(
+                usuario.getId(),
+                usuario.getEmail(),
+                usuario.getPassword(),
+                usuario.getNombre(),
+                usuario.getEdad(),
+                usuario.getGenero());
+    }
 }

@@ -12,6 +12,7 @@ import com.backend.frutti.model.Usuario;
 import com.backend.frutti.repository.FrutaRepository;
 import com.backend.frutti.repository.UsuarioRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -73,4 +74,21 @@ public class FrutaService {
                         u.getFechaAnalisis(), u.getUsuario().getId()))
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public FrutaDTO obtenerFruta(Long frutaId, Long usuarioId) {
+        Fruta fruta = frutaRepository.obtenerFruta(usuarioId, frutaId);
+        if (fruta == null) {
+            throw new EntityNotFoundException("Fruta no encontrada para el usuario");
+        }
+        return new FrutaDTO(
+                fruta.getId(),
+                fruta.getNombre(),
+                fruta.getEstado(),
+                fruta.getPrecio(),
+                fruta.getLugarAnalisis(),
+                fruta.getFechaAnalisis(),
+                fruta.getUsuario().getId());
+    }
+
 }

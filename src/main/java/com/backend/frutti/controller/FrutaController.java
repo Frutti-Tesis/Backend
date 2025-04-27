@@ -54,4 +54,10 @@ public class FrutaController {
     public List<FrutaDTO> obtenerHistorialFrutas(@PathVariable Long id) {
         return frutaService.obtenerHistorialFrutas(id);
     }
+
+    @GetMapping("/obtenerFruta/{idFruta}, {idUsuario}")
+    public ResponseEntity<FrutaDTO> obtenerFruta(@PathVariable Long idFruta, @PathVariable Long idUsuario) {
+        FrutaDTO frutaDTO = frutaService.obtenerFruta(idFruta, idUsuario);
+        return ResponseEntity.ok(frutaDTO);
+    }
 }

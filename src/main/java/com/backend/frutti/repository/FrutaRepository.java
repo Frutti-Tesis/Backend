@@ -20,4 +20,7 @@ public interface FrutaRepository extends JpaRepository<Fruta, Long> {
 
     @Query("SELECT f FROM Fruta f WHERE f.usuario.id = :usuarioId")
     List<Fruta> obtenerHistorialFrutas(@Param("usuarioId") Long usuarioId);
+
+    @Query("SELECT f FROM Fruta f WHERE f.usuario.id = :usuarioId AND f.id = :frutaId")
+    Fruta obtenerFruta(@Param("usuarioId") Long usuarioId, @Param("frutaId") Long frutaId);
 }
