@@ -67,9 +67,7 @@ public class UsuarioService {
 
             usuario.setEmail(dto.getEmail());
             usuario.setNombre(dto.getNombre());
-            if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-                usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
-            }
+            usuario.setEdad(dto.getEdad());
 
             usuarioRepository.save(usuario);
 
@@ -121,5 +119,26 @@ public class UsuarioService {
                 usuario.getNombre(),
                 usuario.getEdad(),
                 usuario.getGenero());
+    }
+
+    @Transactional
+    public UsuarioDTO actualizarContraseña(Long id, String contraseñaNueva) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+
+            usuario.setPassword(passwordEncoder.encode(contraseñaNueva));
+            usuarioRepository.save(usuario);
+            return UsuarioDTO.builder()
+                    .id(usuario.getId())
+                    .email(usuario.getEmail())
+                    .password(usuario.getPassword())
+                    .nombre(usuario.getNombre())
+                    .edad(usuario.getEdad())
+                    .genero(usuario.getGenero())
+                    .build();
+        } else {
+            return null;
+        }
     }
 }

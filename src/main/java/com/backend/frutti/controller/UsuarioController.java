@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.backend.frutti.DTOs.CambiarContraseñaDTO;
 import com.backend.frutti.DTOs.UsuarioDTO;
 import com.backend.frutti.DTOs.UsuarioUpdateDTO;
 import com.backend.frutti.service.UsuarioService;
@@ -38,7 +39,7 @@ public class UsuarioController {
 
     @PatchMapping("/actualizarUsuario/{id}")
     public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id,
-                                                         @RequestBody @Valid UsuarioUpdateDTO usuarioUpdateDTO) {
+            @RequestBody @Valid UsuarioUpdateDTO usuarioUpdateDTO) {
         UsuarioDTO usuarioActualizado = usuarioService.actualizarUsuario(id, usuarioUpdateDTO);
         if (usuarioActualizado != null) {
             return ResponseEntity.ok(usuarioActualizado);
@@ -46,7 +47,7 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    
+
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
@@ -62,5 +63,16 @@ public class UsuarioController {
     public UsuarioDTO obtenerUsuario(@PathVariable String email) {
         return usuarioService.obtenerUsuario(email);
     }
-    
+
+    @PatchMapping("/actualizarContraseña/{id}")
+    public ResponseEntity<UsuarioDTO> actualizarContraseña(@PathVariable Long id,
+            @RequestBody CambiarContraseñaDTO dto) {
+        UsuarioDTO usuarioActualizado = usuarioService.actualizarContraseña(id, dto.getNuevaPassword());
+        if (usuarioActualizado != null) {
+            return ResponseEntity.ok(usuarioActualizado);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 }
