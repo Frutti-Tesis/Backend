@@ -1,6 +1,6 @@
 package com.backend.frutti.model;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -17,11 +17,19 @@ public class Fruta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nombre;
+
+    @Enumerated(EnumType.STRING)
+    private Nombre nombre;
+
+    @Enumerated(EnumType.STRING)
     private Estado estado;
+
+    @Enumerated(EnumType.STRING)
+    private LugarAnalisis lugarAnalisis;
+
     private float precio;
-    private String lugarAnalisis;
-    private Date fechaAnalisis;
+    private float peso;
+    private LocalDate fechaAnalisis;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

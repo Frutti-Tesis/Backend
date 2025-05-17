@@ -1,8 +1,10 @@
 package com.backend.frutti.DTOs;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import com.backend.frutti.model.Estado;
+import com.backend.frutti.model.LugarAnalisis;
+import com.backend.frutti.model.Nombre;
 
 import lombok.*;
 import jakarta.validation.constraints.*;
@@ -14,8 +16,8 @@ import jakarta.validation.constraints.*;
 public class FrutaDTO {
     private Long id;
 
-    @NotBlank
-    private String nombre;
+    @NotNull
+    private Nombre nombre;
 
     @NotNull
     private Estado estado;
@@ -23,12 +25,15 @@ public class FrutaDTO {
     @NotNull
     private float precio;
 
-    @NotBlank
-    private String lugarAnalisis;
+    @NotNull
+    private float peso;
+
+    @NotNull
+    private LugarAnalisis lugarAnalisis;
 
     @NotNull
     @PastOrPresent
-    private Date fechaAnalisis;
+    private LocalDate fechaAnalisis;
 
     private Long usuarioId;
 }
