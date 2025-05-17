@@ -69,27 +69,32 @@ public class UsuarioService {
     @Transactional
     public UsuarioDTO actualizarUsuario(Long id, UsuarioUpdateDTO dto) {
         Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
-        if (optionalUsuario.isPresent()) {
-            Usuario usuario = optionalUsuario.get();
-
-            usuario.setEmail(dto.getEmail());
-            usuario.setNombre(dto.getNombre());
-            usuario.setEdad(dto.getEdad());
-
-            usuarioRepository.save(usuario);
-
-            return UsuarioDTO.builder()
-                    .id(usuario.getId())
-                    .email(usuario.getEmail())
-                    .password(usuario.getPassword())
-                    .nombre(usuario.getNombre())
-                    .edad(usuario.getEdad())
-                    .frutasAnalizadas(usuario.getFrutasAnalizadas())
-                    .genero(usuario.getGenero())
-                    .build();
-        } else {
+        if (optionalUsuario.isEmpty()) {
             return null;
         }
+
+        Usuario usuario = optionalUsuario.get();
+
+        Optional<Usuario> existenteConEmail = usuarioRepository.findByEmail(dto.getEmail());
+        if (existenteConEmail.isPresent() && !existenteConEmail.get().getId().equals(id)) {
+            throw new RuntimeException("El email ya está en uso por otro usuario");
+        }
+
+        usuario.setEmail(dto.getEmail());
+        usuario.setNombre(dto.getNombre());
+        usuario.setEdad(dto.getEdad());
+
+        usuarioRepository.save(usuario);
+
+        return UsuarioDTO.builder()
+                .id(usuario.getId())
+                .email(usuario.getEmail())
+                .password(usuario.getPassword())
+                .nombre(usuario.getNombre())
+                .edad(usuario.getEdad())
+                .frutasAnalizadas(usuario.getFrutasAnalizadas())
+                .genero(usuario.getGenero())
+                .build();
     }
 
     @Transactional
