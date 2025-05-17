@@ -28,6 +28,7 @@ public class Usuario implements UserDetails {
     private String nombre;
     private String genero;
     private int edad;
+    private int frutasAnalizadas;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

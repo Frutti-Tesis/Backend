@@ -23,6 +23,9 @@ public class UsuarioDTO {
     @NotNull
     private int edad;
 
+    @NotNull
+    private int frutasAnalizadas;
+
     @NotBlank
     private String genero;
 
