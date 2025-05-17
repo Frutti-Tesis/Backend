@@ -63,26 +63,21 @@ public class FrutaService {
         List<Fruta> frutas = frutaRepository.findAll();
 
         frutas.sort((f1, f2) -> {
-            // Comparar por estado (Fresca > Madura > Podrida)
             int estadoCompare = f1.getEstado().compareTo(f2.getEstado());
             if (estadoCompare != 0) {
                 return estadoCompare;
             }
 
-            // Comparar por fecha de análisis (más reciente primero)
             int fechaCompare = f2.getFechaAnalisis().compareTo(f1.getFechaAnalisis());
             if (fechaCompare != 0) {
                 return fechaCompare;
             }
 
-            // Comparar por precio (de menor a mayor)
             return Float.compare(f1.getPrecio(), f2.getPrecio());
         });
 
-        // Obtener las primeras 3 frutas
         List<Fruta> frutasTop3 = frutas.size() > 3 ? frutas.subList(0, 3) : frutas;
 
-        // Convertir las frutas a DTOs y devolver la lista de las 3 primeras
         List<FrutaDTO> frutasDTO = new ArrayList<>();
         for (Fruta fruta : frutasTop3) {
             frutasDTO.add(new FrutaDTO(
@@ -143,10 +138,8 @@ public class FrutaService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
 
-        // Elimina todas las frutas asociadas al usuario
         frutaRepository.deleteByUsuarioId(usuarioId);
 
-        // Reinicia el contador de frutas analizadas
         usuario.setFrutasAnalizadas(0);
         usuarioRepository.save(usuario);
     }
