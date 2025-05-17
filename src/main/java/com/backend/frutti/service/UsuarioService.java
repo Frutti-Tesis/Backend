@@ -30,23 +30,29 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioDTO registrarUsuario(UsuarioDTO dto) {
+        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+
         Usuario usuario = Usuario.builder()
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .nombre(dto.getNombre())
                 .edad(dto.getEdad())
+                .frutasAnalizadas(dto.getFrutasAnalizadas())
                 .genero(dto.getGenero())
                 .build();
 
-        Usuario UsuarioGuardado = usuarioRepository.save(usuario);
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
         return UsuarioDTO.builder()
-                .id(UsuarioGuardado.getId())
-                .email(UsuarioGuardado.getEmail())
-                .password(UsuarioGuardado.getPassword())
-                .nombre(UsuarioGuardado.getNombre())
-                .edad(UsuarioGuardado.getEdad())
-                .genero(UsuarioGuardado.getGenero())
+                .id(usuarioGuardado.getId())
+                .email(usuarioGuardado.getEmail())
+                .password(usuarioGuardado.getPassword())
+                .nombre(usuarioGuardado.getNombre())
+                .edad(usuarioGuardado.getEdad())
+                .frutasAnalizadas(usuarioGuardado.getFrutasAnalizadas())
+                .genero(usuarioGuardado.getGenero())
                 .build();
     }
 
@@ -55,6 +61,7 @@ public class UsuarioService {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios.stream()
                 .map(u -> new UsuarioDTO(u.getId(), u.getEmail(), u.getPassword(), u.getNombre(), u.getEdad(),
+                        u.getFrutasAnalizadas(),
                         u.getGenero()))
                 .collect(Collectors.toList());
     }
@@ -77,6 +84,7 @@ public class UsuarioService {
                     .password(usuario.getPassword())
                     .nombre(usuario.getNombre())
                     .edad(usuario.getEdad())
+                    .frutasAnalizadas(usuario.getFrutasAnalizadas())
                     .genero(usuario.getGenero())
                     .build();
         } else {
@@ -86,6 +94,9 @@ public class UsuarioService {
 
     @Transactional
     public void eliminarUsuario(Long id) {
+        if (!usuarioRepository.existsById(id)) {
+            throw new RuntimeException("El usuario no existe");
+        }
         usuarioRepository.deleteById(id);
     }
 
@@ -118,27 +129,27 @@ public class UsuarioService {
                 usuario.getPassword(),
                 usuario.getNombre(),
                 usuario.getEdad(),
+                usuario.getFrutasAnalizadas(),
                 usuario.getGenero());
     }
 
     @Transactional
     public UsuarioDTO actualizarContraseña(Long id, String contraseñaNueva) {
-        Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
-        if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
 
-            usuario.setPassword(passwordEncoder.encode(contraseñaNueva));
-            usuarioRepository.save(usuario);
-            return UsuarioDTO.builder()
-                    .id(usuario.getId())
-                    .email(usuario.getEmail())
-                    .password(usuario.getPassword())
-                    .nombre(usuario.getNombre())
-                    .edad(usuario.getEdad())
-                    .genero(usuario.getGenero())
-                    .build();
-        } else {
-            return null;
-        }
+        usuario.setPassword(passwordEncoder.encode(contraseñaNueva));
+        usuarioRepository.save(usuario);
+
+        return UsuarioDTO.builder()
+                .id(usuario.getId())
+                .email(usuario.getEmail())
+                .password(usuario.getPassword())
+                .nombre(usuario.getNombre())
+                .edad(usuario.getEdad())
+                .frutasAnalizadas(usuario.getFrutasAnalizadas())
+                .genero(usuario.getGenero())
+                .build();
     }
+
 }

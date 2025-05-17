@@ -1,6 +1,8 @@
 package com.backend.frutti.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ public class FrutaService {
                 .nombre(dto.getNombre())
                 .estado(dto.getEstado())
                 .precio(dto.getPrecio())
+                .peso(dto.getPeso())
                 .lugarAnalisis(dto.getLugarAnalisis())
                 .fechaAnalisis(dto.getFechaAnalisis())
                 .usuario(usuario)
@@ -40,11 +43,15 @@ public class FrutaService {
 
         Fruta frutaGuardada = frutaRepository.save(fruta);
 
+        usuario.setFrutasAnalizadas(usuario.getFrutasAnalizadas() + 1);
+        usuarioRepository.save(usuario);
+
         return FrutaDTO.builder()
                 .id(frutaGuardada.getId())
                 .nombre(frutaGuardada.getNombre())
                 .estado(frutaGuardada.getEstado())
                 .precio(frutaGuardada.getPrecio())
+                .peso(frutaGuardada.getPeso())
                 .lugarAnalisis(frutaGuardada.getLugarAnalisis())
                 .fechaAnalisis(frutaGuardada.getFechaAnalisis())
                 .usuarioId(frutaGuardada.getUsuario().getId())
@@ -52,25 +59,64 @@ public class FrutaService {
     }
 
     @Transactional
-    public List<Fruta> listarFrutas() {
-        return frutaRepository.findAll();
+    public List<FrutaDTO> listarMejoresFrutas() {
+        List<Fruta> frutas = frutaRepository.findAll();
+
+        frutas.sort((f1, f2) -> {
+            // Comparar por estado (Fresca > Madura > Podrida)
+            int estadoCompare = f1.getEstado().compareTo(f2.getEstado());
+            if (estadoCompare != 0) {
+                return estadoCompare;
+            }
+
+            // Comparar por fecha de análisis (más reciente primero)
+            int fechaCompare = f2.getFechaAnalisis().compareTo(f1.getFechaAnalisis());
+            if (fechaCompare != 0) {
+                return fechaCompare;
+            }
+
+            // Comparar por precio (de menor a mayor)
+            return Float.compare(f1.getPrecio(), f2.getPrecio());
+        });
+
+        // Obtener las primeras 3 frutas
+        List<Fruta> frutasTop3 = frutas.size() > 3 ? frutas.subList(0, 3) : frutas;
+
+        // Convertir las frutas a DTOs y devolver la lista de las 3 primeras
+        List<FrutaDTO> frutasDTO = new ArrayList<>();
+        for (Fruta fruta : frutasTop3) {
+            frutasDTO.add(new FrutaDTO(
+                    fruta.getId(),
+                    fruta.getNombre(),
+                    fruta.getEstado(),
+                    fruta.getPrecio(),
+                    fruta.getPeso(),
+                    fruta.getLugarAnalisis(),
+                    fruta.getFechaAnalisis(),
+                    fruta.getUsuario().getId()));
+        }
+
+        return frutasDTO;
     }
 
     @Transactional
-    public boolean actualizarFruta(Long id, FrutaDTO dto) {
-        return frutaRepository.actualizarFruta(id, dto.getNombre(), dto.getPrecio(), dto.getLugarAnalisis()) > 0;
-    }
+    public void eliminarFruta(Long idFruta, Long idUsuario) {
+        Optional<Usuario> optionalUsuario = usuarioRepository.findById(idUsuario);
+        if (optionalUsuario.isPresent()) {
+            Usuario usuario = optionalUsuario.get();
 
-    @Transactional
-    public void eliminarFruta(Long id) {
-        frutaRepository.deleteById(id);
+            usuario.setFrutasAnalizadas(usuario.getFrutasAnalizadas() - 1);
+            usuarioRepository.save(usuario);
+        }
+        frutaRepository.deleteById(idFruta);
     }
 
     @Transactional
     public List<FrutaDTO> obtenerHistorialFrutas(Long usuarioId) {
         List<Fruta> frutas = frutaRepository.obtenerHistorialFrutas(usuarioId);
         return frutas.stream()
-                .map(u -> new FrutaDTO(u.getId(), u.getNombre(), u.getEstado(), u.getPrecio(), u.getLugarAnalisis(),
+                .map(u -> new FrutaDTO(u.getId(), u.getNombre(), u.getEstado(), u.getPrecio(), u.getPeso(),
+                        u.getLugarAnalisis(),
                         u.getFechaAnalisis(), u.getUsuario().getId()))
                 .collect(Collectors.toList());
     }
@@ -86,9 +132,23 @@ public class FrutaService {
                 fruta.getNombre(),
                 fruta.getEstado(),
                 fruta.getPrecio(),
+                fruta.getPeso(),
                 fruta.getLugarAnalisis(),
                 fruta.getFechaAnalisis(),
                 fruta.getUsuario().getId());
+    }
+
+    @Transactional
+    public void eliminarHistorialUsuario(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
+
+        // Elimina todas las frutas asociadas al usuario
+        frutaRepository.deleteByUsuarioId(usuarioId);
+
+        // Reinicia el contador de frutas analizadas
+        usuario.setFrutasAnalizadas(0);
+        usuarioRepository.save(usuario);
     }
 
 }
