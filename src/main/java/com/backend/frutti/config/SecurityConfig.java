@@ -39,6 +39,10 @@ public class SecurityConfig {
 
     @Autowired
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     @Autowired
     @Lazy
     private final UsuarioService usuarioService;
@@ -51,17 +55,15 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auth/login", "/fruta/**",
-                                "/usuario/**")
+                        .requestMatchers("/auth/login", "/fruta/**", "/usuario/**")
                         .permitAll()
-                        .anyRequest().authenticated()
-
-                )
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)) // <-- Aquí
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider()).addFilterBefore(
-                        jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
 
     @Bean
